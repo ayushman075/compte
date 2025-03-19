@@ -104,29 +104,29 @@ The **Contest Tracker App** helps users track upcoming and past coding contests 
 - Create a **.env** file and add the following variables:
 
 ### Backend Setup
-```
+```bash
   git clone [<repo_url>](https://github.com/ayushman075/compte)
   cd backend
   npm install
   npm start
 ```
 
-  ```env
-  MONGODB_URI=<your_mongodb_connection_string>
-  PORT=8080
-  CLERK_PUBLISHABLE_KEY=<your_clerk_publishable_key>
-  CLERK_SECRET_KEY=<your_clerk_secret_key>
-  CLERK_WEBHOOK_SECRET_KEY=<your_clerk_webhook_secret_key>
+```env
+MONGODB_URI=<your_mongodb_connection_string>
+PORT=8080
+CLERK_PUBLISHABLE_KEY=<your_clerk_publishable_key>
+CLERK_SECRET_KEY=<your_clerk_secret_key>
+CLERK_WEBHOOK_SECRET_KEY=<your_clerk_webhook_secret_key>
 
-  NODEMAILER_SERVICE_PROVIDER=gmail
-  NODEMAILER_EMAIL=<your_email>
-  NODEMAILER_PASSWORD=<your_email_app_password>
+NODEMAILER_SERVICE_PROVIDER=gmail
+NODEMAILER_EMAIL=<your_email>
+NODEMAILER_PASSWORD=<your_email_app_password>
 
-  REDIS_URL=<your_redis_url>
-  REDIS_PORT=6379
+REDIS_URL=<your_redis_url>
+REDIS_PORT=6379
 ```
 ### Frontend Setup
-```
+```bash
 cd frontend
 npm install
 npm run dev
@@ -138,10 +138,5 @@ npm run dev
 - Progressive Web App (PWA) support for offline access.
 - AI-based Contest Recommendations based on past participation.
 
-## Contact
-For queries, reach out via ayushman8521@gmail.com.
-
-
-
-
-
+## 📩 Contact
+For queries, reach out via [ayushman8521@gmail.com](mailto:ayushman8521@gmail.com).
