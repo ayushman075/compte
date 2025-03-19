@@ -43,6 +43,9 @@ The **Contest Tracker App** helps users track upcoming and past coding contests 
 - Users can also **manually add** PCD links if missing.
 - Helps users access solutions and discussions after a contest.
 
+### 🔹 Role Based Login - RBAC
+- **Admin-Login** Admin can login using thier credentials to update PCD links.
+
 ### 🔹 Adaptive UI & Dark Mode
 - **Fully responsive UI** built with **ShadCN & Tailwind CSS**.
 - **Platform-wise filtering** to easily find contests.
