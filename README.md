@@ -1,7 +1,7 @@
 # Compte Contest Tracker App
 
 ## 📌 Quick Links  
-🎥 **Video Demo**: [Watch Here](<your_video_demo_link>)  
+🎥 **Video Demo**: [Watch Here](https://drive.google.com/file/d/1SLduromLqLn2iWQYaoacCsYVCEMrqc7G/view?usp=sharing)  
 🔗 **Frontend**: [View Code](<your_frontend_link>)  
 🔗 **Backend**: [View Code](<your_backend_link>)  
 
