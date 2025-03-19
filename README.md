@@ -105,7 +105,7 @@ The **Contest Tracker App** helps users track upcoming and past coding contests 
 
 ### Backend Setup
 ```bash
-  git clone [<repo_url>](https://github.com/ayushman075/compte)
+  git clone https://github.com/ayushman075/compte
   cd backend
   npm install
   npm start
