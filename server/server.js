@@ -18,7 +18,7 @@ dotenv.config({
 
 app.use(cors(
     {
-    origin:["http://localhost:5173", "http://localhost","http://localhost:8000","https://qulth.vercel.app"],
+    origin:["https://compte-pi.vercel.app","http://localhost:5173", "http://localhost","http://localhost:8000","https://qulth.vercel.app"],
     methods:["GET","POST","OPTIONS","PUT","UPDATE","DELETE"],
     credentials: true
 }
