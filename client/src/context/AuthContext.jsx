@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         identifier: email,
         password,
       });
-      <Navigate to={"/"} />
+      <Navigate to={"/contest"} />
       window.location.reload()
     } catch (err) {
         toast.error("Error Logging in, PLease try again")
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await signOut();
       toast.success("Logged out successfully!");
-      <Navigate to={"/login"} />
+      <Navigate to={"/"} />
     } catch (err) {
       toast.error("Error logging out, please try again.");
       console.error("Logout failed:", err);
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await handleRedirectCallback();
       toast.success("Google login successful!");
-      <Navigate to={"/"}/>
+      <Navigate to={"/contest"}/>
     } catch (err) {
       toast.error("Error processing Google login.");
       console.error("OAuth callback failed:", err);

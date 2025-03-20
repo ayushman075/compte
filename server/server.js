@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import { ClerkExpressWithAuth,ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
 import connectDB from "./configs/db.config.js";
 import { fetchCodeChefContests, fetchCodeforcesContests, fetchLeetcodeContestsPuppeteer } from "./services/scrapper.js";
-import scrapeContests from "./cron.js";
+import {scrapeContests,scrapePCDLinks} from './cron.js'
 
 
 
@@ -63,3 +63,4 @@ connectDB().then(() => {
 });
 
 scrapeContests();
+scrapePCDLinks();

@@ -14,6 +14,7 @@ import OAuthCallback from './components/OAuthCallback'
 import Home from './pages/Home'
 import BookmarksPage from './pages/BookmarkPage'
 import { ThemeProvider } from './context/theme-provider'
+import LandingPage from './pages/LandingPage'
 
 function App() {
 
@@ -37,9 +38,10 @@ function App() {
     
      <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Home/>}/>
+        <Route path='/contest' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
+        <Route path='/' element={<LandingPage/>}/>
         <Route path='/bookmarks' element={<BookmarksPage/>}/>
         <Route path="/oauth-callback" element={<OAuthCallback />} />
 

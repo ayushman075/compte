@@ -1,6 +1,27 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
+@theme inline {
+  /* Configure your theme variables here */
+  --font-display: "Inter", "sans-serif";
+  --color-primary-500: oklch(0.84 0.18 117.33);
+  --spacing: 0.25rem;
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+ .custom-calendar .react-calendar {
+   width: 100%;
+   border: none;
+   background: transparent;
+ }
 
 @custom-variant dark (&:is(.dark *));
 

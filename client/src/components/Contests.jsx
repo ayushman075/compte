@@ -8,14 +8,15 @@ import {
   Bookmark, 
   BookmarkCheck, 
   PlusCircle, 
-  X 
+  X,
+  ChevronDown
 } from 'lucide-react';
 import { format, isPast, parseISO, addHours, isAfter } from 'date-fns';
 import { toast } from 'react-toastify';
 import axiosInstance from '@/utils/axiosConfig';
 import { FaYoutube } from 'react-icons/fa';
 import { useAuthData } from '../context/AuthContext';
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   Table, 
@@ -31,30 +32,23 @@ const ContestTableDisplay = () => {
   const [upcomingContests, setUpcomingContests] = useState([]);
   const [pastContests, setPastContests] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [bookmarkedContests, setBookmarkedContests] = useState([]);
-  
   const [isAdmin, setIsAdmin] = useState(false);
   const {userData, isSignedIn} = useAuthData();
-  
   const [showPcdForm, setShowPcdForm] = useState(false);
   const [selectedContestId, setSelectedContestId] = useState(null);
   const [pcdLinkInput, setPcdLinkInput] = useState('');
-  
-
   const [selectedPlatforms, setSelectedPlatforms] = useState(['All']);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
-
   const [upcomingPage, setUpcomingPage] = useState(1);
   const [pastPage, setPastPage] = useState(1);
   const [hasMoreUpcoming, setHasMoreUpcoming] = useState(true);
   const [hasMorePast, setHasMorePast] = useState(true);
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const [hoverCard, setHoverCard] = useState(null);
   const limit = 10;
-  
 
   const platforms = ['All', 'Codeforces', 'Codechef', 'Leetcode', 'Atcoder', 'HackerRank'];
-
 
   const platformLogos = {
     'Codeforces': 'https://codeforces.org/s/0/favicon-32x32.png',
@@ -71,37 +65,30 @@ const ContestTableDisplay = () => {
     return match ? parseInt(match[1]) : 2; 
   };
 
- 
   useEffect(() => {
-    setIsAdmin(userData.role == 'admin')
+    setIsAdmin(userData.role === 'admin')
   }, [userData]);
-
 
   const handlePlatformSelect = (platform) => {
     setSelectedPlatforms(prev => {
-    
       if (platform === 'All') {
         return ['All'];
       }
       
-     
       const newSelected = prev.includes('All') 
         ? [platform] 
         : prev.includes(platform)
           ? prev.filter(p => p !== platform)
           : [...prev, platform];
       
-      
       return newSelected.length === 0 ? ['All'] : newSelected;
     });
   };
-
 
   const fetchContests = async (page, isPast) => {
     try {
       const sortOrder = isPast ? '-start_time' : 'start_time'; 
       
-     
       const params = {
         page,
         limit,
@@ -120,7 +107,6 @@ const ContestTableDisplay = () => {
         const now = new Date();
         const contestsArray = response.data.data.contests || [];
         
-               
         const contests = contestsArray.filter(contest => {
           if (!contest || !contest.start_time) return false;
           
@@ -129,7 +115,6 @@ const ContestTableDisplay = () => {
           return isPast ? !isAfter(endTime, now) : isAfter(endTime, now);
         });
         
-      
         return {
           contests,
           currentPage: response.data.data.currentPage,
@@ -146,14 +131,12 @@ const ContestTableDisplay = () => {
     }
   };
 
-
   const fetchBookmarks = async () => {
     try {
       if(isSignedIn){
         const response = await axiosInstance.get('bookmark/getAll');
         if (response.data.success) {
           setBookmarkedContests(response.data.data.bookmarks || []);
-          console.log('Bookmarks loaded:', response.data.data.bookmarks);
         } else {
           console.error('Failed to fetch bookmarks:', response.data.message);
         }
@@ -270,16 +253,12 @@ const ContestTableDisplay = () => {
     loadInitialData();
   }, []);
 
- 
   useEffect(() => {
     setUpcomingPage(1);
     setPastPage(1);
     setUpcomingContests([]);
     setPastContests([]);
     
-    console.log('Platform filter ', selectedPlatforms);
-    
-
     loadInitialData();
   }, [selectedPlatforms]);
 
@@ -301,7 +280,6 @@ const ContestTableDisplay = () => {
     setHasMorePast(data.currentPage < data.totalPages);
   };
 
-
   const handleOpenLink = (url, linkType) => {
     if (!url) {
       toast.warning(`No ${linkType} link available`);
@@ -312,8 +290,7 @@ const ContestTableDisplay = () => {
     toast.info(`Opening ${linkType} link`);
   };
 
-  const ContestRow = ({ contest, showBookmark = false, isPastTab = false }) => {
-
+  const ContestRow = ({ contest, showBookmark = false, isPastTab = false, index }) => {
     if (!contest || !contest.start_time) {
       return null;
     }
@@ -322,83 +299,126 @@ const ContestTableDisplay = () => {
     const endTime = addHours(startTime, parseDuration(contest.duration));
     const isPastContest = isPast(endTime);
     const bookmarked = isBookmarked(contest._id);
+    const isHovered = hoverCard === contest._id;
+    
+
+    const now = new Date();
+    const timeRemaining = startTime.getTime() - now.getTime();
+    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
     
     return (
-      <TableRow className="group">
-        <TableCell className="font-medium">
-          {contest.name}
-        </TableCell>
-        <TableCell className="text-center">
-          <div className="flex justify-center">
-            <img 
-              src={platformLogos[contest.platform] || '/placeholder-logo.png'}
-              alt={contest.platform}
-              className="w-6 h-6"
-              title={contest.platform}
-            />
-          </div>
-        </TableCell>
-        <TableCell>
-          {format(startTime, 'MMM dd, yyyy')}
-        </TableCell>
-        <TableCell>
-          {format(startTime, 'hh:mm a')} - {format(endTime, 'hh:mm a')}
-        </TableCell>
-        <TableCell>
-          {contest.duration || 'N/A'}
-        </TableCell>
-        <TableCell>
-          <div className="flex space-x-2">
-            <Button 
-              size="sm"
-              variant="outline" 
-              className="flex items-center"
-              onClick={() => handleOpenLink(contest.url, 'contest')}
-              disabled={!contest.url}
-            >
-              {isPastContest ? 'View' : 'Register'} <ExternalLink className="ml-1 h-3 w-3" />
-            </Button>
+      <Card 
+        className={`mb-4 overflow-hidden transition-all duration-300 border hover:shadow-lg hover:border-emerald-500/50 ${isHovered ? 'transform  shadow-lg' : ''}`}
+        onMouseEnter={() => setHoverCard(contest._id)}
+        onMouseLeave={() => setHoverCard(null)}
+      >
+        <div className={`h-1 w-full ${isPastContest ? 'bg-gradient-to-r from-slate-400 to-slate-300 dark:from-slate-700 dark:to-slate-600' : 'bg-gradient-to-r from-emerald-500 to-green-500'}`}></div>
+        <CardContent className="p-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 mr-3">
+                  <div className="relative w-12 h-12 overflow-hidden rounded-full flex items-center justify-center bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900">
+                    <img 
+                      src={platformLogos[contest.platform] || '/placeholder-logo.png'}
+                      alt={contest.platform}
+                      className="w-8 h-8 object-contain"
+                      title={contest.platform}
+                    />
+                  </div>
+                </div>
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold text-left mb-1 line-clamp-2">{contest.name}</h3>
+                  <div className="flex items-center text-sm text-muted-foreground space-x-2">
+                    <span>{contest.platform}</span>
+                    <span>•</span>
+                    <span>{contest.duration || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             
-            {contest.pcdLink ? (
-              <Button 
-                size="sm"
-                variant="secondary" 
-                className="flex items-center text-red-600 dark:text-red-400 cursor-pointer"
-                onClick={() => handleOpenLink(contest.pcdLink, 'PCD')}
-              >
-                <FaYoutube className="h-4 w-4" />
-              </Button>
-            ) : (
-              isAdmin && isPastTab && (
+            <div className="flex flex-col justify-between">
+              <div className="flex flex-col space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Date:</span>
+                  <span className="font-medium">{format(startTime, 'MMM dd, yyyy')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Time:</span>
+                  <span className="font-medium">{format(startTime, 'hh:mm a')}</span>
+                </div>
+                
+                {!isPastContest && (
+                  <div className="mt-2">
+                    <div className="text-sm text-center font-medium">
+                      {days > 0 ? `${days}d ${hours}h ${minutes}m` : hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`} remaining
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mt-1 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-emerald-500 to-green-500 h-1.5 rounded-full" 
+                        style={{ width: `${Math.min(100, (timeRemaining / (1000 * 60 * 60 * 24 * 7)) * 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end space-x-2 mt-4">
                 <Button 
                   size="sm"
-                  variant="secondary" 
-                  className="flex items-center gap-1"
-                  onClick={() => handleAddPcdLink(contest._id)}
+                  variant="outline" 
+                  className="flex items-center bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 dark:hover:from-emerald-900/30 dark:hover:to-green-900/30 transition-all duration-300"
+                  onClick={() => handleOpenLink(contest.url, 'contest')}
+                  disabled={!contest.url}
                 >
-                  <PlusCircle className="h-3 w-3" /> PCD
+                  {isPastContest ? 'View' : 'Register'} <ExternalLink className="ml-1 h-3 w-3" />
                 </Button>
-              )
-            )}
-            
-            {showBookmark && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className={`flex items-center ${bookmarked ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
-                onClick={() => toggleBookmark(contest._id)}
-                title={bookmarked ? "Remove bookmark" : "Bookmark this contest"}
-              >
-                {bookmarked ? (
-                  <BookmarkCheck className="h-4 w-4" />
+                
+                {contest.pcdLink ? (
+                  <Button 
+                    size="sm"
+                    variant="secondary" 
+                    className="flex items-center bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
+                    onClick={() => handleOpenLink(contest.pcdLink, 'PCD')}
+                  >
+                    <FaYoutube className="h-4 w-4 mr-1" /> PCD
+                  </Button>
                 ) : (
-                  <Bookmark className="h-4 w-4" />
+                  isAdmin && isPastTab && (
+                    <Button 
+                      size="sm"
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                      onClick={() => handleAddPcdLink(contest._id)}
+                    >
+                      <PlusCircle className="h-3 w-3" /> PCD
+                    </Button>
+                  )
                 )}
-              </Button>
-            )}
+                
+                {showBookmark && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className={`flex items-center ${bookmarked ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'} hover:bg-transparent`}
+                    onClick={() => toggleBookmark(contest._id)}
+                    title={bookmarked ? "Remove bookmark" : "Bookmark this contest"}
+                  >
+                    {bookmarked ? (
+                      <BookmarkCheck className="h-5 w-5" />
+                    ) : (
+                      <Bookmark className="h-5 w-5" />
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-        </TableCell>
-      </TableRow>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -413,13 +433,21 @@ const ContestTableDisplay = () => {
     }
     
     return (
-      <TableRow>
-        <TableCell colSpan={6} className="h-32 text-center">
-          <div className="text-muted-foreground">
-            {message}
-          </div>
-        </TableCell>
-      </TableRow>
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <div className="text-6xl opacity-30 mb-4">🏆</div>
+        <div className="text-lg font-medium text-muted-foreground">
+          {message}
+        </div>
+        <div className="mt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setSelectedPlatforms(['All'])}
+            className="text-sm"
+          >
+            Reset Filters
+          </Button>
+        </div>
+      </div>
     );
   };
 
@@ -428,9 +456,10 @@ const ContestTableDisplay = () => {
     
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-background/80 backdrop-blur-sm">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md border border-emerald-500/20 overflow-hidden">
+          <div className="h-1 w-full bg-gradient-to-r from-emerald-500 to-green-500"></div>
           <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Add PCD Link</h3>
+            <h3 className="text-xl font-semibold mb-4">Add PCD Link</h3>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">
                 YouTube URL
@@ -444,11 +473,14 @@ const ContestTableDisplay = () => {
                 autoFocus
               />
             </div>
-            <div className="flex justify-end space-x-3 mt-4">
+            <div className="flex justify-end space-x-3 mt-6">
               <Button variant="outline" onClick={closePcdForm}>
                 Cancel
               </Button>
-              <Button onClick={submitPcdLink}>
+              <Button 
+                onClick={submitPcdLink}
+                className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600"
+              >
                 Save
               </Button>
             </div>
@@ -458,49 +490,59 @@ const ContestTableDisplay = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto">
+    <div className="mx-auto relative">
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        <div className="absolute -top-10 -left-10 w-72 h-72 bg-emerald-500 opacity-10 dark:opacity-5 rounded-full blur-3xl animate-blob"></div>
+        <div className="absolute top-1/3 -right-10 w-72 h-72 bg-green-500 opacity-10 dark:opacity-5 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-10 left-1/3 w-72 h-72 bg-teal-500 opacity-10 dark:opacity-5 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
       <div className="container mx-auto p-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-emerald-500 to-green-500 bg-clip-text text-transparent">
+            Coding Contests
+          </h1>
+          <p className="text-muted-foreground">Find and track competitive programming contests across various platforms</p>
+        </div>
+
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="relative">
               <div 
-                className="flex items-center border rounded-md p-2 w-full  md:w-80 cursor-pointer bg-background hover:bg-accent/50"
+                className="flex items-center border rounded-md p-3 w-full md:w-80 cursor-pointer bg-background hover:bg-accent/50 transition-colors"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <div className="flex flex-1 flex-wrap gap-1">
                   {selectedPlatforms.includes('All') ? (
-                    <span>All Platforms</span>
+                    <span className="flex items-center">
+                      All Platforms <ChevronDown className="ml-1 h-4 w-4" />
+                    </span>
                   ) : (
-                    selectedPlatforms.map(platform => (
-                      <Badge key={platform} variant="secondary" className="mr-1 flex items-center gap-1">
-                        {platformLogos[platform] && (
-                          <img
-                            src={platformLogos[platform]}
-                            alt={platform}
-                            className="w-4 h-4"
-                          />
-                        )}
-                        {platform}
-                        <span 
-                          className="cursor-pointer ml-1" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlatformSelect(platform);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </span>
-                      </Badge>
-                    ))
+                    <>
+                      <span className="text-sm text-muted-foreground mr-2">Platforms:</span>
+                      {selectedPlatforms.map(platform => (
+                        <Badge key={platform} variant="secondary" className="mr-1 flex items-center gap-1 bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900">
+                          {platformLogos[platform] && (
+                            <img
+                              src={platformLogos[platform]}
+                              alt={platform}
+                              className="w-4 h-4"
+                            />
+                          )}
+                          {platform}
+                          <span 
+                            className="cursor-pointer ml-1" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlatformSelect(platform);
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </span>
+                        </Badge>
+                      ))}
+                    </>
                   )}
                 </div>
               </div>
@@ -511,7 +553,7 @@ const ContestTableDisplay = () => {
                     {platforms.map(platform => (
                       <div 
                         key={platform}
-                        className={`flex items-center p-2 hover:bg-accent cursor-pointer rounded ${
+                        className={`flex items-center p-2 hover:bg-accent cursor-pointer rounded transition-colors ${
                           selectedPlatforms.includes(platform) ? 'bg-accent/50' : ''
                         }`}
                         onClick={() => {
@@ -542,6 +584,7 @@ const ContestTableDisplay = () => {
                     <Button 
                       size="sm" 
                       onClick={() => setDropdownOpen(false)}
+                      className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white"
                     >
                       Apply
                     </Button>
@@ -549,95 +592,141 @@ const ContestTableDisplay = () => {
                 </div>
               )}
             </div>
+            
+            <div className="flex items-center">
+              <Tabs 
+                defaultValue="upcoming" 
+                className="w-full md:w-auto"
+                onValueChange={setActiveTab}
+                value={activeTab}
+              >
+                <TabsList className="grid w-full grid-cols-2 h-12">
+                  <TabsTrigger 
+                    value="upcoming"
+                    className={`text-sm md:text-base ${activeTab === "upcoming" ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : ""}`}
+                  >
+                    Upcoming Contests
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="past"
+                    className={`text-sm md:text-base ${activeTab === "past" ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : ""}`}
+                  >
+                    Past Contests
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
         </div>
 
-        <Tabs defaultValue="upcoming">
-          <TabsList className="mb-4">
-            <TabsTrigger value="upcoming">Upcoming Contests</TabsTrigger>
-            <TabsTrigger value="past">Past Contests</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upcoming">
-            <Card id="upcoming-table">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/4 text-center">Contest Name</TableHead>
-                    <TableHead className="w-1/12 text-center">Platform</TableHead>
-                    <TableHead className="w-1/8 text-center">Date</TableHead>
-                    <TableHead className="w-1/6 text-center">Time</TableHead>
-                    <TableHead className="w-1/12 text-center">Duration</TableHead>
-                    <TableHead className="w-1/6 text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {upcomingContests.length > 0 ? (
-                    upcomingContests.map(contest => (
+        <div className="mt-8">
+          {loading ? (
+            <div className="container mx-auto p-4 max-w-6xl flex justify-center items-center h-64">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full border-4 border-t-green-500 border-r-green-400 border-b-green-300 border-l-green-200 animate-spin"></div>
+              <div className="absolute inset-0 flex justify-center items-center">
+                <div className="w-6 h-6 rounded-full bg-background animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          ) : (
+            <Tabs 
+              defaultValue="upcoming" 
+              className="w-full"
+              onValueChange={setActiveTab}
+              value={activeTab}
+            >
+              <TabsContent value="upcoming" className="mt-0">
+                {upcomingContests.length > 0 ? (
+                  <div className="space-y-2">
+                    {upcomingContests.map((contest, index) => (
                       <ContestRow 
                         key={contest._id || Math.random().toString(36)} 
                         contest={contest}
                         showBookmark={true} 
                         isPastTab={false}
+                        index={index}
                       />
-                    ))
-                  ) : (
-                    <EmptyState type="upcoming" />
-                  )}
-                </TableBody>
-              </Table>
-              {hasMoreUpcoming && (
-                <div className="flex justify-center py-4">
-                  <Button onClick={fetchMoreUpcoming} variant="outline">
-                    Load More
-                  </Button>
-                </div>
-              )}
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="past">
-            <Card id="past-table">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/4 text-center">Contest Name</TableHead>
-                    <TableHead className="w-1/12 text-center">Platform</TableHead>
-                    <TableHead className="w-1/8 text-center">Date</TableHead>
-                    <TableHead className="w-1/6 text-center">Time</TableHead>
-                    <TableHead className="w-1/12 text-center">Duration</TableHead>
-                    <TableHead className="w-1/6 text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pastContests.length > 0 ? (
-                    pastContests.map(contest => (
+                    ))}
+                    {hasMoreUpcoming && (
+                      <div className="flex justify-center py-4">
+                        <Button 
+                          onClick={fetchMoreUpcoming} 
+                          variant="outline"
+                          className="border-dashed border-emerald-300 dark:border-emerald-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors"
+                        >
+                          Load More Contests
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <EmptyState type="upcoming" />
+                )}
+              </TabsContent>
+              
+              <TabsContent value="past" className="mt-0">
+                {pastContests.length > 0 ? (
+                  <div className="space-y-2">
+                    {pastContests.map((contest, index) => (
                       <ContestRow 
                         key={contest._id || Math.random().toString(36)} 
                         contest={contest}
                         showBookmark={false}
                         isPastTab={true}
+                        index={index}
                       />
-                    ))
-                  ) : (
-                    <EmptyState type="past" />
-                  )}
-                </TableBody>
-              </Table>
-              {hasMorePast && (
-                <div className="flex justify-center py-4">
-                  <Button onClick={fetchMorePast} variant="outline">
-                    Load More
-                  </Button>
-                </div>
-              )}
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    ))}
+                    {hasMorePast && (
+                      <div className="flex justify-center py-4">
+                        <Button 
+                          onClick={fetchMorePast} 
+                          variant="outline"
+                          className="border-dashed border-emerald-300 dark:border-emerald-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors"
+                        >
+                          Load More Contests
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <EmptyState type="past" />
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
       </div>
       
-   
+      
       <PcdLinkModal />
+
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: scale(1) translate(0, 0); }
+          33% { transform: scale(1.1) translate(30px, -20px); }
+          66% { transform: scale(0.9) translate(-20px, 20px); }
+          100% { transform: scale(1) translate(0, 0); }
+        }
+        .animate-blob {
+          animation: blob 10s infinite alternate;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        .animation-delay-500 {
+          animation-delay: 0.5s;
+        }
+        .animation-delay-1000 {
+          animation-delay: 1s;
+        }
+        .transform.scale-101 {
+          transform: scale(1.01);
+        }
+      `}</style>
     </div>
   );
 };
