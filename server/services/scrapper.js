@@ -3,7 +3,15 @@ import fetch from "node-fetch";
 import Contest from "../models/contest.model.js";
 
 async function fetchLeetcodeContestsPuppeteer() {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({
+        headless: 'new',
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu'
+        ]
+    });
     const page = await browser.newPage();
 
 
@@ -65,7 +73,15 @@ async function fetchLeetcodeContestsPuppeteer() {
 
 
 async function fetchCodeChefContests() {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        headless: 'new',
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu'
+        ]
+    });
     const page = await browser.newPage();
     await page.goto("https://www.codechef.com/contests", { waitUntil: "networkidle2", timeout: 50000 });
     
