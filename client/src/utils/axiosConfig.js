@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie'; 
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v1/',
+  baseURL: 'https://compte-jzi9.onrender.com/api/v1/',
   timeout: 500000, 
   headers: {
     'Content-Type': 'application/json',
