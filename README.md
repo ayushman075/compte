@@ -2,6 +2,8 @@
 
 ## 📌 Quick Links  
 🎥 **Video Demo**: [Watch Here](https://drive.google.com/file/d/1rxCkOjnUg410W0T7fk7LudT5k7FzOwue/view?usp=sharing)  
+🌐 **Live App**: [Compte Contest Tracker](https://compte-pi.vercel.app/)  
+🛠️ **Backend API**: [Compte Backend](https://compte-jzi9.onrender.com/) 
 
 
 ## 📜 Table of Contents
@@ -53,6 +55,11 @@ The **Contest Tracker App** helps users track upcoming and past coding contests 
 ### 🔹 Infinite Scrolling for a Smooth Experience
 - Implements **infinite scrolling** for contest listings.
 - Provides a **fluid user experience** without excessive page loads.
+
+### 🔹 Calendar View of Contests
+- Interactive **calendar view** to visualize upcoming and past contests.
+- Users can click on contest dates to view details and register.
+- Supports **monthly, weekly, and daily** views for better tracking.
 
 ### 🔹 Robust Backend Infrastructure
 - **Node.js & Express.js** for scalable API handling.
