@@ -171,7 +171,7 @@ const getContest = AsyncHandler(async (req, res) => {
 });
 
 const getAllContests = AsyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, platform, startAfter, startBefore } = req.query;
+  const { page = 1, limit = 100, platform, startAfter, startBefore } = req.query;
 
   const pageNumber = parseInt(page);
   const limitNumber = parseInt(limit);
