@@ -1,7 +1,9 @@
-import puppeteer from "puppeteer";
+import puppeteer from 'puppeteer-extra'
 import fetch from "node-fetch";
 import Contest from "../models/contest.model.js";
+import StealthPlugin from "puppeteer-extra-plugin-stealth"
 
+puppeteer.use(StealthPlugin());
 async function fetchLeetcodeContestsPuppeteer() {
     const browser = await puppeteer.launch({
         headless: 'new',
@@ -14,6 +16,13 @@ async function fetchLeetcodeContestsPuppeteer() {
     });
     const page = await browser.newPage();
 
+
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+
+    // Set other headers
+    await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+    });
 
     page.on("console", msg => console.log("PAGE LOG:", msg.text()));
 
@@ -83,6 +92,15 @@ async function fetchCodeChefContests() {
         ]
     });
     const page = await browser.newPage();
+
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+
+    // Set other headers
+    await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+    });
+
+
     await page.goto("https://www.codechef.com/contests", { waitUntil: "networkidle2", timeout: 5000000 });
     
     const contests = await page.evaluate(() => {
