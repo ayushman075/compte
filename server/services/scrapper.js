@@ -19,7 +19,7 @@ async function fetchLeetcodeContestsPuppeteer() {
 
     await page.goto("https://leetcode.com/contest/", { waitUntil: "networkidle2", timeout: 50000 });
 
-    await page.waitForSelector(".swiper-slide", { timeout: 15000 });
+    await page.waitForSelector(".swiper-slide", { timeout: 1500000 });
 
     const contests = await page.evaluate(() => {
         console.log("Reached: Extracting contests"); 
@@ -83,7 +83,7 @@ async function fetchCodeChefContests() {
         ]
     });
     const page = await browser.newPage();
-    await page.goto("https://www.codechef.com/contests", { waitUntil: "networkidle2", timeout: 50000 });
+    await page.goto("https://www.codechef.com/contests", { waitUntil: "networkidle2", timeout: 5000000 });
     
     const contests = await page.evaluate(() => {
         return Array.from(document.querySelectorAll("._flex__container_7s2sw_528")).map(contest => {
