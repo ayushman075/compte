@@ -62,5 +62,5 @@ connectDB().then(() => {
     console.log("Error connecting to database !!", err);
 });
 
-//scrapeContests();
-//scrapePCDLinks();
+scrapeContests();
+scrapePCDLinks();

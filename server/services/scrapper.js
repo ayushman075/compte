@@ -42,7 +42,7 @@ async function fetchLeetcodeContestsPuppeteer() {
                 name: titleElem ? titleElem.textContent.trim() : "Unknown",
                 url: linkElem ? "https://leetcode.com" + linkElem.getAttribute("href") : "#",
                
-                start_time: timeElem ? timeElem.textContent.trim() : "Unknown",
+                start_time: timeElem ? timeElem.textContent.trim() :null,
                 duration:"01:30",
                 platform:"Leetcode"
             };
