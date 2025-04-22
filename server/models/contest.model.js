@@ -18,7 +18,6 @@ const contestSchema = new mongoose.Schema({
     start_time: {
         type: Date,
         default:Date.now,
-        required: true
     },
     duration: {
         type: String,
